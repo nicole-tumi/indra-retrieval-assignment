@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from .schemas import IndexRequest, SearchRequest, SearchResponse
-from ..retrieval.pipeline import RetrievalPipeline
+from retrieval.pipeline import RetrievalPipeline
 import pandas as pd
 import logging
 

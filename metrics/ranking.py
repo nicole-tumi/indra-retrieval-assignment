@@ -1,6 +1,6 @@
 from typing import List, Set, Dict, Iterable, Tuple
 import numpy as np
-from ..retrieval.text import tokenize, char_ngrams, normalize_text
+from retrieval.text import tokenize, char_ngrams, normalize_text
 
 def _precision_at_k(retrieved: List[str], gold: Set[str], k: int) -> float:
     hits = 0

@@ -1,7 +1,7 @@
 import argparse
 import pandas as pd
-from ..retrieval.pipeline import RetrievalPipeline
-from ..metrics.ranking import map_at_k, graded_map_at_k
+from retrieval.pipeline import RetrievalPipeline
+from metrics.ranking import map_at_k, graded_map_at_k
 
 def parse_gold(s: str):
     if pd.isna(s): return []

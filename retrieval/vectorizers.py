@@ -71,61 +71,72 @@ class HybridTfidf:
         return topk[rows, sorted_idx]
 
 class BM25:
-    """
-    Lightweight BM25 (Okapi) for titles+descriptions.
-    Tokenization uses sklearn's default in TfidfVectorizer preprocessor.
-    """
-    def __init__(self, k1: float=1.5, b: float=0.75):
+    def __init__(self, k1: float = 1.5, b: float = 0.75):
         self.k1 = k1
         self.b = b
-        self.df: Dict[str,int] = {}
-        self.idf: Dict[str,float] = {}
-        self.doc_lens: List[int] = []
-        self.avgdl: float = 0.0
-        self.docs_tokens: List[List[str]] = []
+        self.df = {}
+        self.idf = {}
+        self.doc_lens = []
+        self.avgdl = 0.0
+        self.docs_tokens = []
 
-    def _tokenize(self, s: str) -> List[str]:
+    def _tokenize(self, s: str):
+        from .text import normalize_text
         return normalize_text(s).split()
 
-    def fit(self, titles: List[str], descriptions: List[str]):
-        docs = [(t or "") + " " + (d or "") for t,d in zip(titles, descriptions)]
+    def fit(self, titles, descriptions):
+        import numpy as np
+        def _safe(x):
+            try:
+                return "" if x is None or x != x else str(x)
+            except Exception:
+                return ""
+        docs = [f"{_safe(t)} {_safe(d)}" for t, d in zip(titles, descriptions)]
         N = len(docs)
         self.docs_tokens = [self._tokenize(x) for x in docs]
         self.doc_lens = [len(toks) for toks in self.docs_tokens]
         self.avgdl = float(np.mean(self.doc_lens)) if self.doc_lens else 0.0
+
         # df
         self.df = {}
         for toks in self.docs_tokens:
             for w in set(toks):
                 self.df[w] = self.df.get(w, 0) + 1
-        # idf
-        self.idf = {w: float(np.log(1 + (N - df + 0.5)/(df + 0.5))) for w,df in self.df.items()}
+
+        # idf (Okapi)
+        self.idf = {w: float(np.log(1 + (N - df + 0.5) / (df + 0.5))) for w, df in self.df.items()}
         return self
 
-    def search(self, queries: List[str], k: int=10) -> np.ndarray:
+    def search(self, queries, k: int = 10):
+        import numpy as np
         results = []
         for q in queries:
             q_toks = self._tokenize(q)
             scores = np.zeros(len(self.docs_tokens), dtype=float)
             for i, toks in enumerate(self.docs_tokens):
-                score = 0.0
                 len_i = len(toks)
                 if len_i == 0:
-                    scores[i] = 0.0
                     continue
                 # term frequencies
                 tf = {}
                 for w in toks:
-                    tf[w] = tf.get(w,0)+1
+                    tf[w] = tf.get(w, 0) + 1
+                score = 0.0
                 for w in q_toks:
-                    if w not in tf: 
+                    tfw = tf.get(w, 0)
+                    if tfw == 0:
                         continue
                     idf = self.idf.get(w, 0.0)
-                    numerator = tf[w] * (self.k1 + 1.0)
-                    denom = tf[w] + self.k1 * (1 - self.b + self.b * (len_i / (self.avgdl + 1e-8)))
+                    numerator = tfw * (self.k1 + 1.0)
+                    denom = tfw + self.k1 * (1 - self.b + self.b * (len_i / (self.avgdl + 1e-8)))
                     score += idf * (numerator / (denom + 1e-8))
                 scores[i] = score
-            topk = np.argpartition(-scores, kth=min(k, len(scores)-1))[:k]
+            if len(scores) == 0:
+                results.append(np.array([], dtype=int))
+                continue
+            topk = np.argpartition(-scores, kth=min(k, max(1, len(scores)) - 1))[:k]
             topk = topk[np.argsort(-scores[topk])]
             results.append(topk)
         return np.vstack(results)
+
+

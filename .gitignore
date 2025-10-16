@@ -1,0 +1,50 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+.env
+*.env
+*.log
+
+# --- Virtual environment ---
+venv/
+.venv/
+
+# --- Jupyter / VSCode temporary files ---
+.ipynb_checkpoints/
+.vscode/
+*.code-workspace
+
+# --- OS Files ---
+.DS_Store
+Thumbs.db
+
+# --- FastAPI / Uvicorn temp ---
+*.pid
+*.sqlite3
+
+# --- Data files - IGNORE ALL REAL CSVs ---
+data/*.csv
+
+# --- EXCEPTIONS: allow only sample/example files & data readme ---
+!data/README.md
+!data/*_clean.csv
+
+# --- Output artifacts ---
+*.txt
+*.md.bak
+
+# --- Optional: exclude generated evaluation scripts ---
+clean_products.py
+clean_queries.py
+sanitize_products.py
+build_queries_clean.py
+validate_clean.py
+peek_cols.py
+
+# --- If you keep these only for internal use ---
+README_EN.txt
+README_ES.txt
