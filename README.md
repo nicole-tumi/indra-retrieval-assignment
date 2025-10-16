@@ -63,41 +63,49 @@ indra-retrieval-assignment/
 
 ## Running the Microservice (FastAPI)
 
+```
 uvicorn service.app:app --reload --port 8000
+```
 
 ### Sample Request:
 
+```
 curl -X POST "http://127.0.0.1:8000/search" -H "Content-Type: application/json" -d '{"queries": ["blue chair"], "k": 3}'
+```
 
 ### Sample Response:
 
+```
 {
 "results": [
 ["1234", "991", "812"]
 ]
 }
+```
 
 ## Reproducibility — Evaluation via CLI
 
+```
 python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./data/queries_clean.csv --model tfidf_char_word --k 10
+```
 
-## Trade-offs & What I Would Do With More Time
+## Trade-offs & What I Would Explore With More Time
 
-| Idea                                     | Rationale                                                 |
-| ---------------------------------------- | --------------------------------------------------------- |
-| ✅ Weighted fields (title > description) | Quick improvement to ranking quality                      |
-| ✅ Char n-grams for robustness           | Helps with typos & lexical drift                          |
-| 🚧 Fusion (BM25 + TF-IDF hybrid scoring) | Classic production technique for recall+precision balance |
-| 🚧 Integrate LLM-based reranker          | Would refine top-k ranking with semantic understanding    |
-| 🚧 Click-feedback / learning-to-rank     | Bring real user relevance into the metric vs. weak labels |
+| Idea                                      | Why I Considered It                                                                           |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------- |
+| ✅ Weighted fields (title > description)  | A simple way to improve ranking without changing architecture                                 |
+| ✅ Char n-grams for more tolerance        | Makes the model more robust to typos and small variations                                     |
+| 🚧 Fusion (BM25 + TF-IDF)                 | With more time, I’d like to experiment combining signals to improve both recall and precision |
+| 🚧 Light re-ranking with a semantic model | I would try a lightweight re-ranker (LLM or embedding-based) just on top-k results            |
+| 🚧 Click-based or user-feedback signals   | In a real system, relevance should come from real user behavior, not just static labels       |
 
 ## Deliverables
 
--   ✔ Model improvements above MAP@10 = **0.30**
--   ✔ Graded MAP metric implemented and justified
--   ✔ Code refactored into clean OOP modules
--   ✔ FastAPI microservice delivered
--   ✔ Reproducible evaluation (`run_eval.py`)
--   ✔ Ready for further extensions (reranking, hybrid search, LLM inference)
+-   ✔ MAP@10 improved above the required **0.30**
+-   ✔ Added a Graded MAP metric to fairly evaluate partial matches
+-   ✔ Code refactored into modular OOP components to allow future extensions
+-   ✔ Working FastAPI microservice responding to search queries
+-   ✔ Evaluation reproducible via CLI (`run_eval.py`)
+-   ✔ Left the structure ready for future improvements like fusion scoring or reranking
 
 > 💡 A Spanish version (`README_ES.md`) is included for clarity and accessibility.

@@ -40,21 +40,27 @@ Según el enunciado original:
 
 ## Cómo usar el microservicio
 
+```
 uvicorn service.app:app --reload --port 8000
+```
 
 Consulta de ejemplo:
 
+```
 curl -X POST "http://127.0.0.1:8000/search" \
  -H "Content-Type: application/json" \
  -d '{"queries": ["blue chair"], "k": 3}'
+```
 
 ## Cómo reproducir la evaluación
 
 Ejecutar desde terminal:
 
+```
 python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./data/queries_clean.csv --model tfidf --k 10
 python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./data/queries_clean.csv --model tfidf_char_word --k 10
 python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./data/queries_clean.csv --model bm25 --k 10
+```
 
 ## Nota sobre MAP y validez del resultado
 
