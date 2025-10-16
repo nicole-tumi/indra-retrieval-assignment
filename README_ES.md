@@ -1,32 +1,32 @@
-# Indra Retrieval Assignment — Versión en Español
+# Indra Retrieval Assignment — Versión en Español (Junior-Friendly Tone)
 
-Este proyecto implementa un prototipo de motor de búsqueda de productos para e-commerce utilizando el dataset **WANDS (Wayfair)**.  
-El objetivo **no era construir el mejor modelo posible**, sino **demostrar una mejora razonable sobre un baseline existente** y estructurar el código de forma profesional (extensible, mantenible y preparado para producción con FastAPI).
+Este proyecto es un prototipo de motor de búsqueda para e-commerce basado en el dataset **WANDS (Wayfair)**.
+El enfoque no fue buscar el modelo más avanzado posible, sino **mejorar el baseline de forma clara y justificable**, y estructurar el código pensando en que pueda crecer en el futuro (microservicio, modularidad, posibilidad de agregar nuevos modelos).
 
 ## ¿Para qué sirve este proyecto?
 
-Simula cómo funciona un buscador de productos en una tienda online (ej. Amazon, Wayfair, Mercado Libre).  
-Dado un texto de búsqueda como "silla azul de terciopelo", el sistema devuelve los IDs de productos más relevantes, ordenados por score.
+Imita el comportamiento de un buscador de productos como los que existen en sitios tipo **Amazon o Wayfair**.
+El usuario escribe algo como "silla azul de terciopelo" y el sistema devuelve una lista ordenada de IDs de productos que considera más relevantes.
 
-## Objetivo del Assessment (resumido)
+## Objetivo del Assessment (resumido en palabras simples)
 
-Según el enunciado original:
+El enunciado pedía:
 
--   El baseline tenía **MAP@10 = 0.29**
--   Con **cualquier mejora > 0.30**, el reto se considera superado.
--   También se debía:
-    -   Implementar una métrica que tome en cuenta **coincidencias parciales** (no solo exactas).
-    -   Refactorizar el código con clases y modularidad (OOP).
-    -   Convertir el prototipo en un **microservicio (FastAPI)**.
-    -   Dejar todo reproducible desde consola (sin notebooks rotos).
+-   El baseline original tenía **MAP@10 = 0.29**
+-   Se considera suficiente **superar 0.30**
+-   Además, se solicitaba:
+    -   Tener en cuenta **coincidencias parciales**, no solo exactas.
+    -   Organizar el código en **clases (OOP)** para hacerlo extensible.
+    -   Mostrar el motor como un **microservicio FastAPI**.
+    -   Asegurar que todo pueda **reproducirse por consola**, sin depender del notebook.
 
-## ¿Qué se mejoró?
+## ¿Qué se implementó/mejoró?
 
--   ✅ Se creó una variante de TF-IDF que incluye **char n-grams** para tolerar errores, sinónimos y variaciones de texto.
--   ✅ Se implementó una métrica adicional: **Graded MAP@10**, que da crédito parcial a resultados similares.
--   ✅ Se refactorizó todo el código en módulos (retrieval/, metrics/, etc.) siguiendo principios **OOP**.
--   ✅ Se expuso el motor como una **API FastAPI**, lista para recibir consultas.
--   ✅ Se generó un script evaluador (`run_eval.py`) reproducible desde consola.
+-   ✅ Se añadió una variante de TF-IDF con **char n-grams**, que ayuda cuando el texto no coincide exactamente o hay pequeñas variaciones.
+-   ✅ Se agregó una métrica extra (**Graded MAP@10**) para que los resultados similares reciban algo de crédito y no se consideren totalmente irrelevantes.
+-   ✅ Se reorganizó el código en módulos separados, siguiendo principios de **código mantenible y legible**.
+-   ✅ Se expuso el buscador como un **endpoint de FastAPI** para simular una API real.
+-   ✅ Se creó un script CLI (`run_eval.py`) para evaluar de forma rápida sin depender del notebook.
 
 ## Resultados obtenidos
 
@@ -36,9 +36,9 @@ Según el enunciado original:
 | TF-IDF char+word  | 0.4434 |    0.5028     |
 | BM25              | 0.4261 |    0.4682     |
 
-✔ Según el enunciado del challenge, **"un score > 0.30 demuestra mejora suficiente"**, por lo que la solución es **válida**.
+✔ Como el reto pedía superar **0.30**, los resultados alcanzados **cumplen el criterio de mejora**.
 
-## Cómo usar el microservicio
+## Cómo iniciar el microservicio
 
 ```
 uvicorn service.app:app --reload --port 8000
@@ -52,9 +52,7 @@ curl -X POST "http://127.0.0.1:8000/search" \
  -d '{"queries": ["blue chair"], "k": 3}'
 ```
 
-## Cómo reproducir la evaluación
-
-Ejecutar desde terminal:
+## Cómo ejecutar la evaluación por consola
 
 ```
 python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./data/queries_clean.csv --model tfidf --k 10
@@ -62,8 +60,8 @@ python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./d
 python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./data/queries_clean.csv --model bm25 --k 10
 ```
 
-## Nota sobre MAP y validez del resultado
+## Notas sobre MAP y expectativas
 
--   El reto indica que alcanzar más de **0.30** ya demuestra valor.
--   Los sistemas reales van de **0.6 a 0.9**, pero **no se espera llegar ahí**.
--   Lo que se evalúa aquí es **razonamiento técnico + arquitectura limpia + microservicio**, no solo el número.
+-   El documento oficial del reto indica que **"más de 0.30 ya demuestra una mejora válida"**.
+-   Los sistemas en producción suelen estar en **0.6 - 0.9**, pero **no se esperaba llegar ahí en este ejercicio**.
+-   La evaluación se enfoca más en la **forma de pensar, la limpieza del código y la capacidad de preparar algo ampliable**, no solo en la métrica final.
