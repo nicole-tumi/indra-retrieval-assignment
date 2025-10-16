@@ -58,7 +58,7 @@ indra-retrieval-assignment/
 │
 ├── evaluation/ # CLI eval script (run_eval.py)
 │
-└── data/ (ignored in repo)
+└── data/ # products_clean.csv and queries_clean.csv
 ```
 
 ## Running the Microservice (FastAPI)
@@ -112,4 +112,4 @@ python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./d
 -   ✔ Evaluation reproducible via CLI (`run_eval.py`)
 -   ✔ Left the structure ready for future improvements like fusion scoring or reranking
 
-> 💡 A Spanish version (`README_ES.md`) is included for clarity and accessibility.
+> 💡 A Spanish version (`README_ES.md`) is included for accessibility.
