@@ -43,6 +43,7 @@ However, in real search systems, **"blue velvet chair"** should **partially rewa
 
 ## Project Structure
 
+```
 indra-retrieval-assignment/
 │
 ├── retrieval/ # Core OOP search pipeline
@@ -58,6 +59,7 @@ indra-retrieval-assignment/
 ├── evaluation/ # CLI eval script (run_eval.py)
 │
 └── data/ (ignored in repo)
+```
 
 ## Running the Microservice (FastAPI)
 
