@@ -1,32 +1,29 @@
-# Indra Retrieval Assignment — Versión en Español
+# Indra Retrieval Assignment — Versión en Español (Baseline trabajado con enfoque práctico)
 
-Este proyecto es un prototipo de motor de búsqueda para e-commerce basado en el dataset **WANDS (Wayfair)**.
-El enfoque no fue buscar el modelo más avanzado posible, sino **mejorar el baseline de forma clara y justificable**, y estructurar el código pensando en que pueda crecer en el futuro (microservicio, modularidad, posibilidad de agregar nuevos modelos).
+Este proyecto es un **prototipo funcional de motor de búsqueda de productos**, inspirado en el dataset **WANDS (Wayfair)**.
+Mi enfoque fue **tener un baseline que funcione end-to-end**, que se pueda entender y que alguien más pueda extenderlo sin perderse. Me encargué de:
 
-## ¿Para qué sirve este proyecto?
+-   Documentar las decisiones para que el código pueda crecer.
+-   Explorar pequeñas mejoras que impacten directamente en **MAP@10 > 0.30**, que era el objetivo del reto.
 
-Imita el comportamiento de un buscador de productos como los que existen en sitios tipo **Amazon o Wayfair**.
-El usuario escribe algo como "silla azul de terciopelo" y el sistema devuelve una lista ordenada de IDs de productos que considera más relevantes.
+## ¿Qué buscaba lograr?
 
-## Overview
-
--   El baseline original tenía **MAP@10 = 0.29**
--   Se considera suficiente **superar 0.30**
--   Además, se solicitaba:
-    -   Tener en cuenta **coincidencias parciales**, no solo exactas.
-    -   Organizar el código en **clases (OOP)** para hacerlo extensible.
-    -   Mostrar el motor como un **microservicio FastAPI**.
-    -   Asegurar que todo pueda **reproducirse por consola**, sin depender del notebook.
+-   ✔ Mejorar el **MAP@10** por encima de 0.30 (el baseline original estaba en ~0.29).
+-   ✔ Sumar una métrica de **relevancia parcial (Graded MAP@10)**.
+-   ✔ Reorganizar el código en un **formato modular/OOP**.
+-   ✔ **Exponer el pipeline como un microservicio FastAPI**.
+-   ✔ Dejar un flujo de evaluación reproducible por CLI.
 
 ## ¿Qué se implementó?
 
--   ✅ Se añadió una variante de TF-IDF con **char n-grams**, que ayuda cuando el texto no coincide exactamente o hay pequeñas variaciones.
--   ✅ Se agregó una métrica extra (**Graded MAP@10**) para que los resultados similares reciban algo de crédito y no se consideren totalmente irrelevantes.
--   ✅ Se reorganizó el código en módulos separados, siguiendo principios de código mantenible y legible.
--   ✅ Se expuso el buscador como un **endpoint de FastAPI** para simular una API real.
--   ✅ Se creó un script CLI (`run_eval.py`) para evaluar de forma rápida sin depender del notebook.
+-   `retrieval/pipeline.py`: Pipeline principal con `.fit()` y `.search()`.
+-   `vectorizers.py`: TF-IDF word y char n-grams.
+-   `retriever.py`: Adaptadores para BM25 / TF-IDF.
+-   `metrics/ranking.py`: MAP@10 + Graded MAP@10.
+-   `service/app.py`: Microservicio FastAPI simple.
+-   `evaluation/run_eval.py`: Script CLI sin notebook.
 
-## Resultados obtenidos
+## Resultados obtenidos (WANDS Dataset)
 
 | Modelo            | MAP@10 | Graded MAP@10 |
 | ----------------- | :----: | :-----------: |
@@ -34,7 +31,10 @@ El usuario escribe algo como "silla azul de terciopelo" y el sistema devuelve un
 | TF-IDF char+word  | 0.4434 |    0.5028     |
 | BM25              | 0.4261 |    0.4682     |
 
-✔ Como el reto pedía superar **0.30**, los resultados alcanzados **cumplen el criterio de mejora**.
+## ¿Por qué añadí Graded MAP?
+
+El baseline original trataba todo como relevante/no relevante. Pero en e-commerce, una coincidencia parcial también puede ser útil.
+Graded MAP otorga puntaje incluso si la coincidencia no es exacta, pero sí cercana (por n-grams).
 
 ## Cómo iniciar el microservicio
 
@@ -42,23 +42,22 @@ El usuario escribe algo como "silla azul de terciopelo" y el sistema devuelve un
 uvicorn service.app:app --reload --port 8000
 ```
 
-Consulta de ejemplo:
-
-```
-curl -X POST "http://127.0.0.1:8000/search" \
- -H "Content-Type: application/json" \
- -d '{"queries": ["blue chair"], "k": 3}'
-```
-
 ## Cómo ejecutar la evaluación por consola
 
 ```
-python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./data/queries_clean.csv --model tfidf --k 10
 python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./data/queries_clean.csv --model tfidf_char_word --k 10
-python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./data/queries_clean.csv --model bm25 --k 10
 ```
 
-## Notas adicionsles
+## Próximos pasos sobre el reto
 
--   El documento oficial del reto indica que **"más de 0.30 ya demuestra una mejora válida"**.
--   La evaluación se enfoca más en la **forma de pensar, la limpieza del código y la capacidad de preparar algo ampliable**, no solo en una métrica final.
+| Idea                                   | Motivo                               |
+| -------------------------------------- | ------------------------------------ |
+| ✅ Ponderar título más que descripción | Mejora rápida sin reescribir nada    |
+| ✅ Usar char n-grams                   | Ayuda con consultas cortas y errores |
+| 🚧 Combinar BM25 + TF-IDF              | Podría subir recall y ranking        |
+| 🚧 Re-ranker con embeddings            | Rerank ligero sólo sobre top-k       |
+| 🚧 Usar señales reales de usuario      | Mejor objetivo a largo plazo         |
+
+## Notas
+
+Preferí entregar algo **limpio y funcional** que se pueda ejecutar fácilmente, antes que un sistema complejo difícil de mantener.

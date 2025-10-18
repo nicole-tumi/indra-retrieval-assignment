@@ -1,5 +1,12 @@
 # Indra Retrieval Assignment — Product Search Prototype
 
+Hi! I wanted to build a **working end-to-end baseline** for product retrieval, focusing more on **clarity and execution** than on over-engineering.
+
+I tried to keep things simple:
+
+-   Make sure the **pipeline runs reliably**.
+-   Document everything clearly so **someone else (or future me)** can continue improving it.
+
 This project implements a simple e-commerce product search engine based on the **WANDS dataset (Wayfair)**.  
 The goal was **not** to achieve a state-of-the-art model, but to:
 
@@ -16,10 +23,10 @@ The goal was **not** to achieve a state-of-the-art model, but to:
     -   TF-IDF hybrid (word + char n-grams → improves partial match robustness)
     -   BM25 baseline (comparison)
 -   **Evaluation metrics:**
-    -   Standard **MAP@10**
-    -   Custom **Graded MAP@10** → accounts for _partial matches_ instead of strict binary relevance
+    -   `MAP@10`: strict relevance
+    -   `Graded MAP@10`: **gives partial credit** when a product is not an exact match but is still close (e.g., "blue velvet chair" vs "navy velvet seat")
 
-## Final Results (WANDS dataset, weak relevance by class)
+## Final Results (WANDS Dataset - Local Run)
 
 | Model              | MAP@10 | Graded MAP@10 |
 | ------------------ | :----: | :-----------: |
@@ -27,21 +34,25 @@ The goal was **not** to achieve a state-of-the-art model, but to:
 | TF-IDF char+word   | 0.4434 |    0.5028     |
 | BM25               | 0.4261 |    0.4682     |
 
-✅ The improved model **exceeds the 0.30 threshold**, formally satisfying the assignment requirement.  
-✅ **Graded MAP@10 > MAP@10** → confirms that **partial relevance** is being captured, unlike the strict baseline.
+✅ **Target >0.30 achieved**  
+✅ **Graded MAP@10 > strict MAP@10**, which shows that **partial matches were actually being recognized**
 
-## Why a Graded Metric?
+## Why I Added Graded MAP?
 
-The original setup treats matches as **binary** (relevant vs. not relevant).  
-However, in real search systems, **"blue velvet chair"** should **partially reward** matches like **"navy velvet seat"**, even if not exact.
+At first, the baseline judged relevance as **binary** (right or wrong).  
+But in e-commerce, users **don’t always type exact product names**, and **near matches still matter**.
 
-**Graded MAP@10**:
+Example idea I followed:
 
--   Gives **partial credit** for lexical or semantic proximity (n-grams).
--   Better reflects real-world retrieval usefulness.
--   Encourages robust models rather than strict token matching.
+> If the user searches for _“brown leather chair”_, ranking _“dark leather armchair”_ slightly lower is fine — but completely discarding it felt too harsh.
 
-## Project Structure
+So I introduced **Graded MAP@10**, which:
+
+-   rewards **close lexical overlap** using n-grams,
+-   keeps the implementation simple enough for a baseline,
+-   gives a metric that **feels more “fair”** than strict MAP.
+
+## Repository Structure (Kept Clean for Learning & Extension)
 
 ```
 indra-retrieval-assignment/
@@ -62,6 +73,8 @@ indra-retrieval-assignment/
 ```
 
 ## Running the Microservice (FastAPI)
+
+I exposed the pipeline via a **small FastAPI app** so it could act like a microservice:
 
 ```
 uvicorn service.app:app --reload --port 8000
@@ -87,21 +100,21 @@ curl -X POST "http://127.0.0.1:8000/search" -H "Content-Type: application/json" 
 }
 ```
 
-## Reproducibility — Evaluation via CLI
+## Evaluation via CLI
 
 ```
 python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./data/queries_clean.csv --model tfidf_char_word --k 10
 ```
 
-## Trade-offs & What I Would Explore With More Time
+## What I Would Explore Next (If I Had More Time)
 
-| Idea                                      | Why I Considered It                                                                           |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------- |
-| ✅ Weighted fields (title > description)  | A simple way to improve ranking without changing architecture                                 |
-| ✅ Char n-grams for more tolerance        | Makes the model more robust to typos and small variations                                     |
-| 🚧 Fusion (BM25 + TF-IDF)                 | With more time, I’d like to experiment combining signals to improve both recall and precision |
-| 🚧 Light re-ranking with a semantic model | I would try a lightweight re-ranker (LLM or embedding-based) just on top-k results            |
-| 🚧 Click-based or user-feedback signals   | In a real system, relevance should come from real user behavior, not just static labels       |
+| Idea                                     | Reason                                         |
+| ---------------------------------------- | ---------------------------------------------- |
+| ✅ Weight title more than description    | Quick improvement without heavy refactor       |
+| ✅ Keep char n-grams                     | Helps with typos and short queries             |
+| 🚧 Fuse BM25 + TF-IDF                    | Could increase both recall and ranking quality |
+| 🚧 Add a light reranker using embeddings | Only on top-k, to keep things efficient        |
+| 🚧 Use click logs or user signals        | A better long-term ranking objective           |
 
 ## Deliverables
 
@@ -109,7 +122,6 @@ python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./d
 -   ✔ Added a Graded MAP metric to fairly evaluate partial matches
 -   ✔ Code refactored into modular OOP components to allow future extensions
 -   ✔ Working FastAPI microservice responding to search queries
--   ✔ Evaluation reproducible via CLI (`run_eval.py`)
--   ✔ Left the structure ready for future improvements like fusion scoring or reranking
+-   ✔ Left the structure ready for future improvements
 
 > 💡 A Spanish version (`README_ES.md`) is included for accessibility.
