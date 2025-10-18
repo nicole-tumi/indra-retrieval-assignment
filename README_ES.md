@@ -1,4 +1,4 @@
-# Indra Retrieval Assignment — Versión en Español (Baseline trabajado con enfoque práctico)
+# Indra Retrieval Assignment — Versión en Español
 
 Este proyecto es un **prototipo funcional de motor de búsqueda de productos**, inspirado en el dataset **WANDS (Wayfair)**.
 Mi enfoque fue **tener un baseline que funcione end-to-end**, que se pueda entender y que alguien más pueda extenderlo sin perderse. Me encargué de:
@@ -58,6 +58,6 @@ python -m evaluation.run_eval --products ./data/products_clean.csv --queries ./d
 | 🚧 Re-ranker con embeddings            | Rerank ligero sólo sobre top-k       |
 | 🚧 Usar señales reales de usuario      | Mejor objetivo a largo plazo         |
 
-## Notas
+### Notas adicionales
 
 Preferí entregar algo **limpio y funcional** que se pueda ejecutar fácilmente, antes que un sistema complejo difícil de mantener.
